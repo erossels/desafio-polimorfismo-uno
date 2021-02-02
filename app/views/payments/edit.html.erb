@@ -16,6 +16,14 @@
     <%= form.collection_select(:payment_method_id, @payment_methods, :id, :name)  %>
   </div>
 
+  <div>
+    <h4>Escoge la opción transbank</h4>
+    <div class="field"> 
+      <%= form.label "Select Payment Method" %>
+      <%= form.collection_select(:option_id, @payment_methods.find(3).options, :id, :name)  %>
+    </div>
+  </div>
+
   <%= form.submit "Pay" %>
 
 <% end %>

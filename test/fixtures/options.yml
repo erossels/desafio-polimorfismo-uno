@@ -1,7 +1,11 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
+  optionable: one
+  optionable_type: Optionable
   name: MyString
 
 two:
+  optionable: two
+  optionable_type: Optionable
   name: MyString

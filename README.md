@@ -32,21 +32,113 @@ end
 
 - [x] Las migraciones y modelos para manejar los medios de pago.
 
-*Para manejar los medios de pago crearemos los modelos: **PaymentMethod** y **Payment**. El modelo PaymentMethod tendrá un nombre y un código que nos permitirá trabajar los casos de transbank. El modelo Payment referenciará a la orden de compra, método de pago, tendrá un status y un total asociado.*
+*Para manejar los medios de pago crearemos los modelos: **PaymentMethod** y **Payment**. El modelo PaymentMethod tendrá un nombre. Tendremos un método **Option** para clasificar los tipos de pago en transbank. El modelo Payment referenciará a la orden de compra, método de pago, tendrá un status y un total asociado.*
 
 ```ruby
 rails g model PaymentMethod name code
-rails g model Payment order:references payment_method:references status total:float
+rails g model Payment order:references payment_method:references
+rails g model Option optionable:references{polymorphic} name
 ```
+
+*Modificamos el modelo PaymentMethod de modo que tenga opciones.*
+```ruby
+class PaymentMethod < ApplicationRecord
+  has_many :options, as: :optionable
+end
+```
+
 
 - [x] Un formulario para simular los medios de pago. Implementarás un modelo Orden de Compra (básico) para poder asociarlo al pago.
 
-*Crearemos un modelo ordenes de compra para asociar al pago. Esto contempla el modelo de la orden de compra (**order**) que tiene un total y el modelo de **OrdenItem** que se relaciona con las ordenes, productos, las cantidades y los precios*
+*Crearemos un modelo ordenes de compra para asociar al pago. Esto contempla el modelo de la orden de compra (**order**) que tiene un total*
 
 ```ruby
 rails g model order total:float
-rails g model orderItem order:references product:references quantity:integer price:float
 ```
+
+*Se implementa un formulario de pago, donde a modo de prueba se ingresa el número de orden y el método de pago*
+
+```ruby
+<h1>Formulario de pago [BORRADOR]</h1>
+    <% if notice %>
+      <p><%= notice %></p>
+    <% end %>
+  <%= form_with(model: @payment, local: true) do |form| %>
+
+    <div class="field"> 
+      <%= form.label :order_id %>
+      <%= form.number_field :order_id %>
+    </div>
+
+    <div class="field"> 
+      <%= form.label "Select Payment Method" %>
+      <%= form.collection_select(:payment_method_id, @payment_methods, :id, :name)  %>
+    </div>
+
+    <%= form.submit "Pay" %>
+  <% end %>
+
+```
+
+*Si el usuario escoge el método transbank, será redigirido a un segundo formulario. Básicamente está editando la instancia de pago. En este caso si se incluye las opciones de pago de transbank*
+
+```ruby
+<h1>Formulario de pago [BORRADOR]</h1>
+    <% if notice %>
+      <p><%= notice %></p>
+    <% end %>
+  <%= form_with(model: @payment, local: true) do |form| %>
+
+    <div class="field"> 
+      <%= form.label :order_id %>
+      <%= form.number_field :order_id %>
+    </div>
+
+    <div class="field"> 
+      <%= form.label "Select Payment Method" %>
+      <%= form.collection_select(:payment_method_id, @payment_methods, :id, :name)  %>
+    </div>
+
+    <div>
+      <h4>Escoge la opción transbank</h4>
+      <div class="field"> 
+        <%= form.label "Select Payment Method" %>
+        <%= form.collection_select(:option_id, @payment_methods.find(3).options, :id, :name)  %>
+      </div>
+    </div>
+
+    <%= form.submit "Pay" %>
+  <% end %>
+
+```
+
+*Lo anterior es posible gracias a lo que hemos definido en el controller de **payments**. En particular el método **create***
+
+```ruby
+  def create
+    @payment = Payment.new(payment_params)
+    @payment.status = 'created'
+    @payment.total = 10_000
+    @payment.payment_method_id = params[:payment][:payment_method_id]
+    @payment.save
+    @payment.option = nil
+
+    if @payment.payment_method_id == 3 && @payment.option.nil?
+      redirect_to edit_payment_path(@payment.id) and return
+    end
+
+    respond_to do |format|
+      if @payment.save
+        format.html { redirect_to root_path, notice: 'Payment was successfully created.' }
+        format.json { render :show, status: :created, location: @payment }
+      else
+        format.html { redirect_to root_path, notice: 'Payment failed' }
+        format.json { render json: @payment.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+```
+
 
 ## PARTE II  
 

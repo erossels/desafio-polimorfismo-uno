@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_02_02_170913) do
+ActiveRecord::Schema.define(version: 2021_02_02_202258) do
 
   create_table "animals", force: :cascade do |t|
     t.string "name"
@@ -21,6 +21,15 @@ ActiveRecord::Schema.define(version: 2021_02_02_170913) do
   create_table "digitals", force: :cascade do |t|
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "options", force: :cascade do |t|
+    t.string "optionable_type", null: false
+    t.integer "optionable_id", null: false
+    t.string "name"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["optionable_type", "optionable_id"], name: "index_options_on_optionable_type_and_optionable_id"
   end
 
   create_table "order_items", force: :cascade do |t|
@@ -42,7 +51,6 @@ ActiveRecord::Schema.define(version: 2021_02_02_170913) do
 
   create_table "payment_methods", force: :cascade do |t|
     t.string "name"
-    t.string "code"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
@@ -54,6 +62,7 @@ ActiveRecord::Schema.define(version: 2021_02_02_170913) do
     t.float "total"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "option"
     t.index ["order_id"], name: "index_payments_on_order_id"
     t.index ["payment_method_id"], name: "index_payments_on_payment_method_id"
   end
