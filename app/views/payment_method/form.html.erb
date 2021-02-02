@@ -1,0 +1,18 @@
+<h1>PaymentMethod#form</h1>
+
+<%= form_with(model: @payment, local: true) do |form| %>
+
+  <div class="field">
+    <%= form.label :PaymentMethod %>
+    <%= form.collection_select(:payment_method, @paymentmethods, :id, :name)  %>
+  </div>
+
+  <div class="field">
+    <%= form.label :PaymentMethod %>
+    <%= form.collection_select(:payment_method, @paymentmethods, :id, :code)  %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>
